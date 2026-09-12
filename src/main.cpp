@@ -1,4 +1,4 @@
-// cache-cleaner: a simple Windows cache/junk file cleaner CLI.
+// sapujagat: a simple Windows cache/junk file cleaner CLI.
 //
 // Scans common cache/junk locations on Windows, shows their size, lets
 // the user pick which ones to clean, then deletes them (skipping any
@@ -8,10 +8,10 @@
 // folder) which are saved to a config file so they persist across runs.
 //
 // Build (Windows, MSVC "Developer Command Prompt"):
-//   cl /std:c++17 /EHsc /O2 src\main.cpp /Fe:cache-cleaner.exe
+//   cl /std:c++17 /EHsc /O2 src\main.cpp /Fe:sapujagat.exe
 //
 // Build (Windows, MinGW-w64 g++):
-//   g++ -std=c++17 -O2 src/main.cpp -o cache-cleaner.exe
+//   g++ -std=c++17 -O2 src/main.cpp -o sapujagat.exe
 //
 // Run as Administrator for full access (Windows\Temp, Prefetch, and the
 // Windows Update cache all require elevated permissions).
@@ -141,7 +141,7 @@ static void parse_args(int argc, char** argv) {
 // -------------------------------------------------------------------------
 static fs::path config_file_path() {
     fs::path dir = env("APPDATA");
-    dir /= "cache-cleaner";
+    dir /= "sapujagat";
     std::error_code ec;
     fs::create_directories(dir, ec);
     return dir / "custom_folders.txt";
@@ -339,9 +339,9 @@ static void empty_recycle_bin() {
 // -------------------------------------------------------------------------
 static void print_header() {
     set_color(9);
-    std::cout << "==============================================\n";
-    std::cout << "   cache-cleaner  --  Windows junk remover\n";
-    std::cout << "==============================================\n";
+    std::cout << "============================================\n";
+    std::cout << "   sapujagat  --  Windows junk remover\n";
+    std::cout << "============================================\n";
     reset_color();
     if (g_dry_run) {
         set_color(14);

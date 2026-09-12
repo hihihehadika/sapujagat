@@ -1,4 +1,4 @@
-# cache-cleaner
+# sapujagat
 
 Simple Windows CLI tool that scans and cleans common cache/junk folders —
 no more manually digging through File Explorer to clear temp files.
@@ -15,7 +15,7 @@ no more manually digging through File Explorer to clear temp files.
 - Recycle Bin
 
 **Custom folders:** add your own folders through the app's menu.
-These are saved to `%APPDATA%\cache-cleaner\custom_folders.txt`, so they
+These are saved to `%APPDATA%\sapujagat\custom_folders.txt`, so they
 persist across sessions. Custom folders also support two delete modes:
 - **Entire folder** — deletes the folder and everything inside it
 - **Contents only** — deletes only the contents, keeping the folder itself
@@ -34,18 +34,18 @@ anything — you pick what to clean, nothing happens automatically.
 
 **MSVC (Developer Command Prompt for VS):**
 ```
-cl /std:c++17 /EHsc /O2 src\main.cpp /Fe:cache-cleaner.exe
+cl /std:c++17 /EHsc /O2 src\main.cpp /Fe:sapujagat.exe
 ```
 
 **MinGW-w64 (g++):**
 ```
-g++ -std=c++17 -O2 src/main.cpp -o cache-cleaner.exe
+g++ -std=c++17 -O2 src/main.cpp -o sapujagat.exe
 ```
 
 ## Run
 
 ```
-cache-cleaner.exe
+sapujagat.exe
 ```
 
 > **Run as Administrator** for full access — `Windows\Temp`, `Prefetch`,
