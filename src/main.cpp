@@ -31,8 +31,8 @@
 #include <vector>
 
 #ifdef _WIN32
-#include <shellapi.h>
 #include <windows.h>
+#include <shellapi.h>
 #endif
 
 namespace fs = std::filesystem;
@@ -623,7 +623,9 @@ int main(int argc, char** argv) {
         std::cout << "> ";
 
         std::string choice;
-        std::getline(std::cin, choice);
+        if (!std::getline(std::cin, choice)) {
+            break;
+        }
 
         if (choice == "1") {
             scan_and_clean_flow();
