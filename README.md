@@ -81,6 +81,7 @@ sapujagat.exe
   cache as a good practice.
 - `--dry-run` mode shows exactly what would be deleted — use it to preview
   before committing to a clean.
+- **Note on Windows SmartScreen**: Because these `.exe` files are compiled locally and not digitally signed (which requires a paid certificate), Windows might show a "Windows protected your PC" blue popup the first time you run it. Simply click **More info** -> **Run anyway**.
 
 ## Note on custom folders
 
