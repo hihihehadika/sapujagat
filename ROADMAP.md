@@ -1,68 +1,65 @@
 # ROADMAP.md
 
-The core features (scan, clean, custom folders, --dry-run, --yes, Firefox
-detection, colorized output, custom folder delete modes) are all implemented
-in `src/main.cpp`.
-
-The two features below are larger architectural changes documented here as
-design notes.
+All planned features are now implemented. See the feature summary below.
 
 ---
 
-## 1. Schedule automatic cleanup (Windows Task Scheduler)
+## Feature Summary
 
-You don't need to write any C++ for this part — it's OS configuration
-around the `.exe` you already have.
+### CLI app (`sapujagat.exe`) — `src/main.cpp`
+- Scan & clean: Windows Temp, Prefetch, Update cache, Explorer thumbnails,
+  Chrome, Edge, Firefox (all profiles), Recycle Bin
+- Custom folders with per-folder delete mode (entire folder or contents-only)
+- `--dry-run` flag: preview what would be deleted
+- `--yes` flag: skip confirmation prompt (for scripting)
+- Colorized output (yellow = sizes, green = done, red = skipped)
+- **[NEW] Schedule automatic cleanup** via Windows Task Scheduler (menu option 4)
+  — generates `run-cleanup.bat` and registers task via `schtasks`
 
-**Steps:**
-1. `--yes` flag is already implemented — a scheduled task can't answer an
-   interactive prompt, so auto-confirm is a prerequisite (done ✓).
-2. Build `cache-cleaner.exe` in release mode.
-3. Create a small wrapper batch file, e.g. `run-cleanup.bat`:
-   ```bat
-   @echo off
-   "C:\path\to\cache-cleaner.exe" --yes
-   ```
-4. Open Task Scheduler → Create Task:
-   - General: run whether user is logged in or not; run with highest
-     privileges (needed for `Windows\Temp` / `Prefetch`).
-   - Triggers: e.g. weekly, or "at log on".
-   - Actions: start `run-cleanup.bat`.
-5. Test it once with "Run" in Task Scheduler before trusting the
-   schedule — check that it actually freed space (you could have it
-   append a line to a log file each run for a quick sanity check).
+### System Tray app (`sapujagat-tray.exe`) — `src/tray_main.cpp`
+- Runs silently in the background (no console window)
+- Right-click tray icon for popup menu:
+  - **Scan & Clean All** — scans then asks confirmation, cleans in background thread
+  - **Dry Run** — shows what would be deleted without deleting
+  - **Show Last Scan Status** — displays cached scan results
+  - **Manage Schedule** — create/remove Task Scheduler task via dialog
+  - **Exit**
+- Double-click tray icon: quick dry run
+- Balloon tip on startup
 
-**Planned improvement:** Add a menu option (`[5] Schedule automatic cleanup`)
-that auto-generates `run-cleanup.bat` and registers the task via `schtasks`
-without the user needing to open Task Scheduler manually.
+### Shared core (`src/core.h`)
+All scan/clean/scheduler logic lives here so both apps share the same code.
+No `std::cin` / `std::cout` dependency in core — safe to call from any context.
 
 ---
 
-## 2. System tray version
+## Build
 
-A bigger rewrite: instead of a console app, this runs in the background
-with just a tray icon, and shows a small menu when clicked
-(Scan & Clean / Manage Custom Folders / Exit).
+**CLI (MinGW):**
+```
+g++ -std=c++17 -O2 -static src/main.cpp -o sapujagat.exe
+```
 
-**Core pieces you'd need (Win32 API):**
-1. A hidden message-only window (`CreateWindowEx` with `HWND_MESSAGE`)
-   to receive Windows messages — a tray app still needs a window to own
-   the icon and process clicks.
-2. `NOTIFYICONDATA` + `Shell_NotifyIcon(NIM_ADD, ...)` to create the
-   tray icon itself.
-3. A custom window message (e.g. `WM_APP + 1`) that Windows sends you
-   when the user interacts with the tray icon — handle it in `WindowProc`.
-4. On right-click, build a popup menu with `CreatePopupMenu` +
-   `AppendMenu`, show it with `TrackPopupMenu` at the cursor position.
-5. Wire menu item selection (`WM_COMMAND`) to call the scanning/cleaning
-   logic — adapted to not use blocking `std::cin`. Use `MessageBox` for
-   confirmation instead.
-6. Standard Win32 message loop (`GetMessage` / `DispatchMessage`).
+**Tray app (MinGW):**
+```
+g++ -std=c++17 -O2 -static -mwindows src/tray_main.cpp -o sapujagat-tray.exe -lshell32 -lcomctl32
+```
 
-**Suggested approach:** Extract the scanning/cleaning logic
-(`build_builtin_targets`, `clean_folder_contents`, etc.) into a shared
-`core.h` / `core.cpp` with no `std::cin`/`std::cout` dependency, so both
-the CLI version and a new `tray_main.cpp` can call the same core logic.
+**CLI (MSVC):**
+```
+cl /std=c++17 /EHsc /O2 src\main.cpp /Fe:sapujagat.exe
+```
 
-This is a genuine multi-day project — a good "next project" rather than
-something to rush into the same repo.
+**Tray app (MSVC):**
+```
+cl /std:c++17 /EHsc /O2 /DWIN32 src\tray_main.cpp /Fe:sapujagat-tray.exe shell32.lib comctl32.lib /link /SUBSYSTEM:WINDOWS
+```
+
+---
+
+## Future Ideas
+
+- Bundle an `.ico` file and use it for the tray icon (instead of the generic shield).
+- Log cleanup results to a file for scheduled runs.
+- Per-category dry-run: show exact file list before deleting.
+- GUI installer (NSIS or Inno Setup).

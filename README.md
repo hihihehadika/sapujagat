@@ -32,14 +32,31 @@ anything — you pick what to clean, nothing happens automatically.
 
 ## Build
 
-**MSVC (Developer Command Prompt for VS):**
+There are two apps. Both share the same core logic in `src/core.h`.
+
+### CLI app (`sapujagat.exe`)
+
+**MSVC:**
 ```
 cl /std:c++17 /EHsc /O2 src\main.cpp /Fe:sapujagat.exe
 ```
-
-**MinGW-w64 (g++):**
+**MinGW-w64:**
 ```
-g++ -std=c++17 -O2 src/main.cpp -o sapujagat.exe
+g++ -std=c++17 -O2 -static src/main.cpp -o sapujagat.exe
+```
+
+### System Tray app (`sapujagat-tray.exe`)
+
+Runs in the background with a tray icon — no console window.
+Right-click the tray icon to scan, clean, preview (dry run), or manage the schedule.
+
+**MinGW-w64:**
+```
+g++ -std=c++17 -O2 -static -mwindows src/tray_main.cpp -o sapujagat-tray.exe -lshell32 -lcomctl32
+```
+**MSVC:**
+```
+cl /std:c++17 /EHsc /O2 /DWIN32 src\tray_main.cpp /Fe:sapujagat-tray.exe shell32.lib comctl32.lib /link /SUBSYSTEM:WINDOWS
 ```
 
 ## Run
@@ -78,6 +95,5 @@ Removing a folder from the list (menu option 3) only removes it from
 
 ## Roadmap
 
-See [ROADMAP.md](./ROADMAP.md) for planned features:
-- [ ] Schedule automatic cleanup via Windows Task Scheduler
-- [ ] System tray app (background, tray icon with popup menu)
+All planned features are implemented. See [ROADMAP.md](./ROADMAP.md) for
+full details and future ideas.
